@@ -1,0 +1,11 @@
+[nixpacks]
+appDirectory = "web"
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm run start"
