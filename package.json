@@ -2,6 +2,9 @@
   "name": "alpar",
   "private": true,
   "workspaces": ["web"],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "npm run dev -w web",
     "build": "npm run build -w web",
