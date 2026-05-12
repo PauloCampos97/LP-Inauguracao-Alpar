@@ -1,5 +1,11 @@
 [nixpacks]
 appDirectory = "web"
 
-[nixpkgs]
-packages = ["nodejs_22"]
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm run start"
