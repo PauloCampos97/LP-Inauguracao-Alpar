@@ -1,0 +1,5 @@
+[nixpacks]
+appDirectory = "web"
+
+[nixpkgs]
+packages = ["nodejs_22"]
