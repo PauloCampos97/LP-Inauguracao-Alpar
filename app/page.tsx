@@ -30,6 +30,7 @@ export default function Home() {
                   width={1200}
                   height={700}
                   className="h-[500px] w-full object-cover"
+                  priority
                 />
 
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.55)_40%,#050816_100%)]" />

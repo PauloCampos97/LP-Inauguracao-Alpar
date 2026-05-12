@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Alpar Inauguração',
+  title: 'Alpar Contabilidade',
   description: 'Evento exclusivo de inauguração da Alpar',
 }
 
@@ -14,6 +14,8 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="bg-[#050816] text-white antialiased">
+          <link rel="icon" href="alpar-logo-SVG.svg" type="image/svg+xml" />
+          <link rel="alternate icon" href="/favicon.ico" />
         {children}
       </body>
     </html>
