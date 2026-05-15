@@ -36,6 +36,9 @@ import {
   Gauge,
   MapPin,
   Building2,
+  Trash2,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react'
 
 type Lead = {
@@ -135,6 +138,9 @@ export default function AdminPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [timeFilter, setTimeFilter] = useState<string>('all')
   const [theme, setTheme] = useState<'upfly' | 'dark' | 'light'>('upfly')
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     document.documentElement.className = theme
@@ -216,6 +222,42 @@ export default function AdminPage() {
     setLeads([])
     setEmail('')
     setPassword('')
+  }
+
+  async function handleDelete() {
+    if (!leadToDelete) return
+    setDeleteLoading(true)
+    setDeleteError(null)
+
+    const token = sessionStorage.getItem('admin_token')
+
+    try {
+      const res = await fetch(`/api/admin/leads/${leadToDelete.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.status === 401) {
+        sessionStorage.removeItem('admin_token')
+        setLoggedIn(false)
+        return
+      }
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setDeleteError(data.message || 'Erro ao excluir agendamento.')
+        return
+      }
+
+      setLeadToDelete(null)
+      setSelectedLead(null)
+      fetchLeads()
+    } catch {
+      setDeleteError('Erro de conexão com o servidor.')
+    } finally {
+      setDeleteLoading(false)
+    }
   }
 
   function handleCopy(text: string, id: string) {
@@ -420,7 +462,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <>
+      <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -813,12 +856,20 @@ export default function AdminPage() {
                               {new Date(lead.createdAt).toLocaleDateString('pt-BR')}
                             </td>
                             <td className="p-4">
-                              <button
-                                onClick={() => setSelectedLead(lead)}
-                                className="cursor-pointer rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs text-primary transition hover:bg-primary/20"
-                              >
-                                Detalhes
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setSelectedLead(lead)}
+                                  className="cursor-pointer rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs text-primary transition hover:bg-primary/20"
+                                >
+                                  Detalhes
+                                </button>
+                                <button
+                                  onClick={() => setLeadToDelete(lead)}
+                                  className="cursor-pointer rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-1.5 text-xs text-destructive transition hover:bg-destructive/20"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -907,10 +958,84 @@ export default function AdminPage() {
         className="max-w-3xl"
       >
         {selectedLead && <LeadDetail lead={selectedLead} onCopy={handleCopy} copiedId={copiedId} />}
+        <div className="flex items-center justify-between gap-4 pt-4">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setLeadToDelete(selectedLead)}
+              className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-2 text-sm text-destructive transition hover:bg-destructive/20"
+            >
+              <Trash2 size={16} />
+              Excluir
+            </button>
+          </div>
+          <button
+            onClick={() => setSelectedLead(null)}
+            className="cursor-pointer rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground transition hover:bg-muted/80"
+          >
+            Fechar
+          </button>
+        </div>
       </Dialog>
-    </div>
-  )
-}
+      </div>
+
+      {leadToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-destructive/30 bg-card p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle size={24} className="text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-card-foreground">
+                  Excluir Agendamento
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Tem certeza que deseja excluir o agendamento de{' '}
+                  <strong className="text-card-foreground">
+                    {leadToDelete.nome}
+                  </strong>
+                  ?
+                </p>
+              </div>
+            </div>
+
+            {deleteError && (
+              <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {deleteError}
+              </div>
+            )}
+
+            <p className="mb-6 rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
+              Esta ação não pode ser desfeita. O lead receberá um e-mail de
+              confirmação sobre o cancelamento.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setLeadToDelete(null)
+                  setDeleteError(null)
+                }}
+                disabled={deleteLoading}
+                className="cursor-pointer rounded-lg border border-border bg-card px-4 py-2 text-sm text-card-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteLoading}
+                className="flex cursor-pointer items-center gap-2 rounded-lg bg-destructive px-4 py-2 text-sm text-destructive-foreground transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleteLoading && <Loader2 size={16} className="animate-spin" />}
+                {deleteLoading ? 'Excluindo...' : 'Sim, excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </>
+    )
+  }
 
 function ChevronIcon() {
   return (

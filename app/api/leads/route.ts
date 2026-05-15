@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { prisma } from '@/app/lib/prisma'
+import { buildConfirmationEmail } from '@/lib/email-template'
 import fs from 'fs'
 import path from 'path'
+
+const EMAIL_FROM = '"Alpar" <comercial@alparcontabilidade.com.br>'
 
 const credentialsPath = path.join(process.cwd(), 'oauth-google.json')
 let oauth: { client_id: string; client_secret: string } | null = null
@@ -93,16 +96,10 @@ export async function POST(req: Request) {
 
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_USER,
+      from: EMAIL_FROM,
       to: email,
-      subject: 'Confirmação de cadastro - Inauguração Alpar',
-      html: `
-        <h2>Cadastro confirmado!</h2>
-        <p>Olá, ${nome}.</p>
-        <p>Seu cadastro foi confirmado para o horário:</p>
-        <strong>${horario}</strong>
-        <p>Esperamos você na inauguração!</p>
-      `,
+      subject: '✅ Vaga Confirmada - Inauguração Alpar',
+      html: buildConfirmationEmail({ nome, horario }),
     })
   } catch (error) {
     console.error('Erro ao enviar e-mail de confirmação:', error)
