@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { CheckCircle } from 'lucide-react'
 
 const horarios = [
   '17:00 às 18:00',
@@ -9,7 +10,7 @@ const horarios = [
   '20:00 às 21:00',
 ]
 
-export default function LeadForm() {
+export default function LeadForm({ onSuccess }: { onSuccess?: () => void }) {
   const [form, setForm] = useState({
     nome: '',
     email: '',
@@ -21,6 +22,17 @@ export default function LeadForm() {
   })
 
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        onSuccess?.()
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [success, onSuccess])
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -47,6 +59,7 @@ export default function LeadForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
@@ -66,16 +79,32 @@ export default function LeadForm() {
       setLoading(false)
 
       if (!res.ok) {
-        alert(data.message || 'Erro ao realizar cadastro.')
+        setError(data.message || 'Erro ao realizar cadastro.')
         return
       }
 
-      alert('Cadastro realizado com sucesso! Verifique seu e-mail.')
+      setSuccess(true)
     } catch {
       clearTimeout(timeout)
       setLoading(false)
-      alert('Erro de conexão com o servidor. Verifique as configurações de SMTP.')
+      setError('Erro de conexão com o servidor. Verifique as configurações de SMTP.')
     }
+  }
+
+  if (success) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-500/30">
+          <CheckCircle size={52} className="text-white" />
+        </div>
+        <h2 className="mb-2 text-center font-serif text-4xl text-white">
+          Vaga Confirmada!
+        </h2>
+        <p className="text-center text-lg text-gray-300">
+          Sua reserva foi realizada com sucesso.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -87,6 +116,12 @@ export default function LeadForm() {
       <p className="mb-8 text-center text-gray-300">
         Preencha o formulário abaixo e garanta seu brinde na inauguração.
       </p>
+
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-red-300">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input name="nome" placeholder="Nome" value={form.nome} onChange={handleChange} required className="w-full rounded-xl border border-indigo-500/30 bg-[#111827] px-4 py-4 text-white outline-none transition focus:border-indigo-400" />

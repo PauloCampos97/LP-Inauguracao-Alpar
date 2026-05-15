@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
 import LeadForm from '@/components/LeadForm'
 import {
@@ -8,9 +11,11 @@ import {
   ShieldCheck,
   Lightbulb,
   Sofa,
+  X,
 } from 'lucide-react'
 
 export default function Home() {
+  const [showForm, setShowForm] = useState(false)
   return (
     <main className="min-h-screen bg-[#050816] text-white">
       <section className="relative overflow-hidden">
@@ -45,7 +50,7 @@ export default function Home() {
                       Convidamos você para um brinde ao futuro do seu negócio em nossa nova sede no Shopping Paragem.  
                     </p>
 
-                    <button className="mt-8 w-fit rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 px-8 py-4 text-xl font-semibold transition hover:scale-105">
+                    <button onClick={() => setShowForm(true)} className="mt-8 w-fit rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 px-8 py-4 text-xl font-semibold transition hover:scale-105">
                        Quero participar da inauguração
                     </button>
                   </div>
@@ -125,18 +130,13 @@ export default function Home() {
               <div className="rounded-2xl border border-white/10 bg-[#0f172a] p-6">
                 <div className="space-y-3 text-lg text-gray-300">
                   <p>📅 Sexta, 29 de Maio de 2026</p>
-                  <p>🕖 Início às 19h00</p>
+                  <p>🕖 Início às 17h00</p>
                   <p>Local: Shopping Paragem <br/>  
                     Avenida Mário Werneck, 1360
                     Estoril-BH MG <br/>
                     Estacionamento E2/G2 Sala 351</p>
                 </div>
               </div>
-            </div>
-
-            {/* FORM */}
-            <div className="mt-12">
-              <LeadForm />
             </div>
 
             <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-6">
@@ -149,6 +149,20 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-indigo-500/30 bg-[#0b1220] p-6 shadow-2xl">
+            <button
+              onClick={() => setShowForm(false)}
+              className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+            >
+              <X size={20} />
+            </button>
+            <LeadForm onSuccess={() => setShowForm(false)} />
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -97,7 +97,7 @@ export default function LeadForm() {
 
         <input name="cnpj" placeholder="CNPJ" value={form.cnpj} onChange={handleChange} required className="w-full rounded-xl border border-indigo-500/30 bg-[#111827] px-4 py-4 text-white outline-none transition focus:border-indigo-400" />
 
-        <input name="faturamento" placeholder="R$ 0,00" value={form.faturamento ? formatBRL(form.faturamento) : ''} onChange={handleFaturamentoChange} required className="w-full rounded-xl border border-indigo-500/30 bg-[#111827] px-4 py-4 text-white outline-none transition focus:border-indigo-400" />
+        <input name="faturamento" placeholder="Faturamento" type="number" value={form.faturamento ? formatBRL(form.faturamento) : ''} onChange={handleFaturamentoChange} required className="w-full rounded-xl border border-indigo-500/30 bg-[#111827] px-4 py-4 text-white outline-none transition focus:border-indigo-400" />
 
         <input type="number" name="colaboradores" placeholder="Número de colaboradores" value={form.colaboradores} onChange={handleChange} required className="w-full rounded-xl border border-indigo-500/30 bg-[#111827] px-4 py-4 text-white outline-none transition focus:border-indigo-400" />
 

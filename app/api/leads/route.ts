@@ -35,6 +35,17 @@ export async function POST(req: Request) {
     )
   }
 
+  const existingLead = await prisma.lead.findFirst({
+    where: { email },
+  })
+
+  if (existingLead) {
+    return NextResponse.json(
+      { message: 'Você já possui uma reserva para o evento.' },
+      { status: 409 }
+    )
+  }
+
   const vagasPreenchidas = await prisma.lead.count({
     where: { horario },
   })
