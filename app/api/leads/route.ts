@@ -2,21 +2,8 @@ import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { prisma } from '@/app/lib/prisma'
 import { buildConfirmationEmail } from '@/lib/email-template'
-import fs from 'fs'
-import path from 'path'
 
 const EMAIL_FROM = '"Alpar" <comercial@alparcontabilidade.com.br>'
-
-const credentialsPath = path.join(process.cwd(), 'oauth-google.json')
-let oauth: { client_id: string; client_secret: string } | null = null
-
-try {
-  const raw = fs.readFileSync(credentialsPath, 'utf-8')
-  const parsed = JSON.parse(raw)
-  oauth = parsed.web
-} catch {
-  // oauth-google.json não encontrado
-}
 
 export async function POST(req: Request) {
   const data = await req.json()
@@ -72,25 +59,17 @@ export async function POST(req: Request) {
     },
   })
 
-  const auth =
-    oauth && process.env.SMTP_REFRESH_TOKEN
-      ? {
-          type: 'OAuth2' as const,
-          user: process.env.SMTP_USER,
-          clientId: oauth.client_id,
-          clientSecret: oauth.client_secret,
-          refreshToken: process.env.SMTP_REFRESH_TOKEN,
-        }
-      : {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        }
-
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
+    host: 'smtp.gmail.com',
+    port: 587,
     secure: false,
-    auth,
+    auth: {
+      type: 'OAuth2',
+      user: process.env.MAIL_FROM,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    },
     connectionTimeout: 10000,
   })
 
