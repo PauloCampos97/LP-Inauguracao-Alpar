@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { google } from 'googleapis'
 import { prisma } from '@/app/lib/prisma'
 import { buildConfirmationEmail } from '@/lib/email-template'
 
-const EMAIL_FROM = '"Alpar" <comercial@alparcontabilidade.com.br>'
+const mailFromName = process.env.MAIL_FROM_NAME || 'Alpar'
+const EMAIL_FROM = `"${mailFromName}" <comercial@alparcontabilidade.com.br>`
 
 export async function POST(req: Request) {
   const data = await req.json()
@@ -59,6 +61,25 @@ export async function POST(req: Request) {
     },
   })
 
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    'https://developers.google.com/oauthplayground'
+  )
+  oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN })
+
+  let accessToken: string
+  try {
+    const { token } = await oauth2Client.getAccessToken()
+    accessToken = token!
+  } catch (error) {
+    console.error('Erro ao gerar accessToken:', error)
+    return NextResponse.json(
+      { message: 'Erro de conexão com o servidor. Verifique as configurações de SMTP.' },
+      { status: 500 }
+    )
+  }
+
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
@@ -69,6 +90,7 @@ export async function POST(req: Request) {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      accessToken,
     },
     connectionTimeout: 10000,
   })
