@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: alpar-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: alpar
+      POSTGRES_PASSWORD: alpar123
+      POSTGRES_DB: alpar_inauguracao
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

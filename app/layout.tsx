@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
-      <body className="bg-[#050816] text-white antialiased">
+    <html lang="pt-BR" className="upfly">
+      <body className="text-foreground antialiased">
           <link rel="icon" href="alpar-logo-SVG.svg" type="image/svg+xml" />
           <link rel="alternate icon" href="/favicon.ico" />
         {children}

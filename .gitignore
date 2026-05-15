@@ -1,3 +1,7 @@
 node_modules/
 .next/
 web/
+
+/app/generated/prisma
+oauth-google.json
+.env.local
